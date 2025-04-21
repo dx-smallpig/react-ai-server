@@ -1,0 +1,51 @@
+version: '3'
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./data:/root/.ollama
+    restart: always
+
+  chromadb:
+    image: chromadb/chroma
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chromadb/data:/data
+    restart: always
+    
+  minio:
+    image: minio/minio
+    container_name: minio
+    hostname: minio
+    restart: always
+    ports:
+      - "9000:9000"  # API 端口
+      - "9001:9001"  # 控制台端口
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin123
+    volumes:
+      - /minio/data:/data
+      - /minio/config:/root/.minio
+    command: server /data --console-address ":9001"
+  
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # 必填：root 用户密码
+      MYSQL_DATABASE: mydb               # 可选：初始化数据库
+      MYSQL_USER: user                   # 可选：创建普通用户
+      MYSQL_PASSWORD: userpassword       # 可选：普通用户密码
+    ports:
+      - "3306:3306"                      # 映射宿主机端口
+    volumes:
+      - ./mysql/mysql_data:/var/lib/mysql        # 持久化数据卷
+      - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf  # 挂载配置文件
+      - ./mysql/init:/docker-entrypoint-initdb.d/     # 挂载初始化脚本目录
