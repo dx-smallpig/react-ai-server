@@ -1,5 +1,6 @@
 const Minio = require('minio');
 const mysql = require('mysql2/promise');
+const { ChromaClient } = require('chromadb');
 
 const minioClient = new Minio.Client({
   endPoint: '127.0.0.1', // 服务器地址
@@ -9,7 +10,7 @@ const minioClient = new Minio.Client({
   secretKey: 'Txj3ov1W3vIcbQPcCBmZFS9h6CQJYR1oCYCx3gZA'
 });
 
-const sqlClirnt = mysql.createPool({
+const sqlClient = mysql.createPool({
   host: '127.0.0.1',
   user: 'root',
   password: 'rootpassword',
@@ -20,4 +21,8 @@ const sqlClirnt = mysql.createPool({
   queueLimit: 0 // 等待队列的最大长度，0 表示无限
 });
 
-module.exports = {minioClient, sqlClirnt};
+const chromaClient = new ChromaClient({
+  path: "http://localhost:8000"
+});
+
+module.exports = {minioClient, sqlClient, chromaClient};
